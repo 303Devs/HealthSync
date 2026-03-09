@@ -58,18 +58,20 @@ const RegisterForm = ({ user }: { user: User }) => {
     }
 
     try {
+      const { identificationDocument: _files, treatmentConsent: _tc, disclosureConsent: _dc, ...restValues } = values;
       const patientData = {
-        ...values,
+        ...restValues,
         userId: user.$id,
         birthDate: new Date(values.birthDate),
         identificationDocument: formData,
-      };
+      } as RegisterUserParams;
 
-      // @ts-expect-error typescript acting a fool
       const patient = await registerPatient(patientData);
       if (patient) router.push(`/patients/${user.$id}/new-appointment`);
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -79,7 +81,7 @@ const RegisterForm = ({ user }: { user: User }) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className='space-y-12 flex-1'>
         <section className='space-y-4'>
-          <h1 className='header'>Welcome 👋</h1>
+          <h1 className='header text-white'>Welcome</h1>
           <p className='text-dark-700'>Tell us about yourself</p>
         </section>
 

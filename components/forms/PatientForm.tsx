@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { UserFormValidation } from '@/lib/validation';
 import { useRouter } from 'next/navigation';
 import { createUser } from '@/lib/actions/patient.actions';
+import Image from 'next/image';
 
 export enum FormFieldType {
   INPUT = 'input',
@@ -54,6 +55,8 @@ const PatientForm = () => {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -62,9 +65,14 @@ const PatientForm = () => {
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className='space-y-6 flex-1'>
-        <section className='mb-12 space-y-4'>
-          <h1 className='header'>Hello Friend 👋</h1>
-          <p className='text-dark-700'>Schedule your first appointment</p>
+        <section className='mb-8 space-y-4'>
+          <h1 className='header text-white'>
+            Your Health,{' '}
+            <span className='text-green-500'>Simplified.</span>
+          </h1>
+          <p className='text-dark-700'>
+            Book and manage appointments in minutes — secure, simple, and always available.
+          </p>
         </section>
         <CustomFormField
           fieldType={FormFieldType.INPUT}
@@ -91,6 +99,20 @@ const PatientForm = () => {
           label='Phone number'
           placeholder='(555) 123-4567'
         />
+        <div className='flex flex-wrap gap-4 pt-2'>
+          <div className='flex items-center gap-2 text-dark-700 text-12-regular'>
+            <Image src='/assets/icons/check-circle.svg' width={14} height={14} alt='' />
+            <span>Secure &amp; Private</span>
+          </div>
+          <div className='flex items-center gap-2 text-dark-700 text-12-regular'>
+            <Image src='/assets/icons/calendar.svg' width={14} height={14} alt='' />
+            <span>Easy Scheduling</span>
+          </div>
+          <div className='flex items-center gap-2 text-dark-700 text-12-regular'>
+            <Image src='/assets/icons/check.svg' width={14} height={14} alt='' />
+            <span>Always Available</span>
+          </div>
+        </div>
         <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
       </form>
     </Form>

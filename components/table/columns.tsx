@@ -8,16 +8,26 @@ import { Doctors } from '@/constants';
 import AppointmentModal from '../AppointmentModal';
 import { Appointment } from '@/types/appwrite.types';
 
+const doctorLookup = new Map(Doctors.map((doc) => [doc.name, doc]));
+
 export const columns: ColumnDef<Appointment>[] = [
   {
     header: 'ID',
-    cell: ({ row }) => <p className='text-14-medium'>{row.index + 1}</p>,
+    cell: ({ row }) => <p className='text-14-medium text-white'>{row.index + 1}</p>,
   },
   {
     accessorKey: 'patient',
-    header: 'Patient',
+    header: ({ column }) => (
+      <button
+        className='flex items-center gap-1 text-dark-700 hover:text-white transition-colors'
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+        Patient
+        <span className='text-xs'>{column.getIsSorted() === 'asc' ? '↑' : column.getIsSorted() === 'desc' ? '↓' : '↕'}</span>
+      </button>
+    ),
+    accessorFn: (row) => row.patient.name,
     cell: ({ row }) => (
-      <p className='text-14-medium'>{row.original.patient.name}</p>
+      <p className='text-14-medium text-white'>{row.original.patient.name}</p>
     ),
   },
   {
@@ -31,9 +41,16 @@ export const columns: ColumnDef<Appointment>[] = [
   },
   {
     accessorKey: 'schedule',
-    header: 'Appointment',
+    header: ({ column }) => (
+      <button
+        className='flex items-center gap-1 text-dark-700 hover:text-white transition-colors'
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+        Appointment
+        <span className='text-xs'>{column.getIsSorted() === 'asc' ? '↑' : column.getIsSorted() === 'desc' ? '↓' : '↕'}</span>
+      </button>
+    ),
     cell: ({ row }) => (
-      <p className='text-14-regular min-w-[100px]'>
+      <p className='text-14-regular min-w-[100px] text-white'>
         {formatDateTime(row.original.schedule).dateTime}
       </p>
     ),
@@ -42,13 +59,10 @@ export const columns: ColumnDef<Appointment>[] = [
     accessorKey: 'primaryPhysician',
     header: 'Doctor',
     cell: ({ row }) => {
-      const appointment = row.original;
-      const doctor = Doctors.find(
-        (doc) => doc.name === appointment.primaryPhysician
-      );
+      const doctor = doctorLookup.get(row.original.primaryPhysician);
 
       if (!doctor) {
-        return <p className='text-red-500'>Doctor not found</p>;
+        return <p className='text-14-medium text-dark-600'>{row.original.primaryPhysician}</p>;
       }
 
       return (
@@ -58,9 +72,9 @@ export const columns: ColumnDef<Appointment>[] = [
             alt={`Dr. ${doctor.name}`}
             height={100}
             width={100}
-            className='size-8'
+            className='size-8 rounded-full'
           />
-          <p className='whitespace-nowrap'>Dr. {doctor.name}</p>
+          <p className='whitespace-nowrap text-white'>Dr. {doctor.name}</p>
         </div>
       );
     },

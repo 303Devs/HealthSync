@@ -2,10 +2,15 @@ import StatCard from '@/components/StatCard';
 import DataTable from '@/components/table/DataTable';
 import { columns } from '@/components/table/columns';
 import { getAllAppointments } from '@/lib/actions/appointment.actions';
+import { checkAdminSession } from '@/lib/actions/admin.actions';
 import Image from 'next/image';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 const Admin = async () => {
+  const authenticated = await checkAdminSession();
+  if (!authenticated) redirect('/');
+
   const appointments = await getAllAppointments();
   return (
     <div className='mx-auto flex flex-col max-w-7xl space-y-14'>
@@ -25,7 +30,7 @@ const Admin = async () => {
       </header>
       <main className='admin-main'>
         <section className='w-full space-y-4'>
-          <h1 className='header'>Welcome 👋</h1>
+          <h1 className='header text-white'>Welcome</h1>
           <p className='text-dark-700'>Manage new and existing appointments.</p>
         </section>
         <section className='admin-stat'>

@@ -15,6 +15,26 @@ export const createAppointment = async (
   appointmentData: CreateAppointmentParams
 ) => {
   try {
+    const scheduleTime = new Date(appointmentData.schedule).getTime();
+    const thirtyMin = 30 * 60 * 1000;
+
+    const conflicts = await databases.listDocuments(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      [
+        Query.equal('primaryPhysician', appointmentData.primaryPhysician),
+        Query.equal('status', 'scheduled'),
+        Query.greaterThan('schedule', new Date(scheduleTime - thirtyMin).toISOString()),
+        Query.lessThan('schedule', new Date(scheduleTime + thirtyMin).toISOString()),
+      ]
+    );
+
+    if (conflicts.total > 0) {
+      throw new Error(
+        `Dr. ${appointmentData.primaryPhysician} already has an appointment within 30 minutes of that time. Please choose a different time.`
+      );
+    }
+
     const newAppointment = await databases.createDocument(
       DATABASE_ID!,
       APPOINTMENT_COLLECTION_ID!,
@@ -24,6 +44,7 @@ export const createAppointment = async (
     return parseStringify(newAppointment);
   } catch (error) {
     console.error(error);
+    throw error;
   }
 };
 

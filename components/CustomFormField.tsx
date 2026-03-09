@@ -1,14 +1,12 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   FormControl,
-  // FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Control } from 'react-hook-form';
+import { Control, ControllerRenderProps, FieldValues } from 'react-hook-form';
 import { FormFieldType } from './forms/PatientForm';
 import Image from 'next/image';
 import 'react-phone-number-input/style.css';
@@ -22,7 +20,7 @@ import { Textarea } from './ui/textarea';
 import { Checkbox } from './ui/checkbox';
 
 interface CustomProps {
-  control: Control<any>;
+  control: Control<FieldValues>;
   fieldType: FormFieldType;
   name: string;
   label?: string;
@@ -36,10 +34,16 @@ interface CustomProps {
   maxDate?: Date;
   minDate?: Date;
   children?: React.ReactNode;
-  renderSkeleton?: (field: any) => React.ReactNode;
+  renderSkeleton?: (field: ControllerRenderProps<FieldValues, string>) => React.ReactNode;
 }
 
-const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
+const RenderField = ({
+  field,
+  props,
+}: {
+  field: ControllerRenderProps<FieldValues, string>;
+  props: CustomProps;
+}) => {
   const {
     fieldType,
     iconSrc,
@@ -52,6 +56,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
     minDate,
     renderSkeleton,
   } = props;
+
   switch (fieldType) {
     case FormFieldType.INPUT:
       return (
@@ -100,14 +105,13 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
         </FormControl>
       );
     case FormFieldType.DATE_PICKER:
-      const currentDate = new Date();
       return (
         <div className='flex rounded-md border border-dark-500 bg-dark-400'>
           <Image
             src='/assets/icons/calendar.svg'
             height={24}
             width={24}
-            alt='user'
+            alt='calendar'
             className='ml-2'
           />
           <FormControl>
@@ -121,7 +125,7 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
               maxDate={maxDate}
               minDate={minDate ?? undefined}
               withPortal
-              openToDate={currentDate}
+              openToDate={new Date()}
               placeholderText='mm/dd/yyyy'
               todayButton={todayButton}
               closeOnScroll={true}
@@ -140,11 +144,9 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
           <Select
             onValueChange={field.onChange}
             defaultValue={field.value}>
-            <FormControl>
-              <SelectTrigger className='shad-select-trigger'>
-                <SelectValue placeholder={placeholder} />
-              </SelectTrigger>
-            </FormControl>
+            <SelectTrigger className='shad-select-trigger'>
+              <SelectValue placeholder={placeholder} />
+            </SelectTrigger>
             <SelectContent className='shad-select-content'>
               {props.children}
             </SelectContent>
@@ -171,9 +173,10 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
         </FormControl>
       );
     default:
-      break;
+      return null;
   }
 };
+
 const CustomFormField = (props: CustomProps) => {
   const { control, fieldType, name, label } = props;
   return (
@@ -183,9 +186,8 @@ const CustomFormField = (props: CustomProps) => {
       render={({ field }) => (
         <FormItem className='flex-1'>
           {fieldType !== FormFieldType.CHECKBOX && label && (
-            <FormLabel>{label}</FormLabel>
+            <FormLabel className='shad-input-label'>{label}</FormLabel>
           )}
-
           <RenderField
             field={field}
             props={props}

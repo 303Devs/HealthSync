@@ -36,6 +36,7 @@ const AppointmentForm = ({
 }: AppointmentFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const AppointmentFormValidation = getAppointmentSchema(type);
 
@@ -70,6 +71,7 @@ const AppointmentForm = ({
         break;
     }
 
+    setSubmitError('');
     try {
       if (type === 'create' && patientId) {
         const appointmentData = {
@@ -109,6 +111,9 @@ const AppointmentForm = ({
       }
     } catch (error) {
       console.error(error);
+      setSubmitError(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -135,7 +140,7 @@ const AppointmentForm = ({
         className='space-y-6 flex-1'>
         {type === 'create' && (
           <section className='mb-12 space-y-4'>
-            <h1 className='header'>New Appointment</h1>
+            <h1 className='header text-white'>New Appointment</h1>
             <p className='text-dark-700'>Schedule a visit now</p>
           </section>
         )}
@@ -205,6 +210,9 @@ const AppointmentForm = ({
             label='Reason for Cancellation'
             placeholder='Enter reason for cancellation'
           />
+        )}
+        {submitError && (
+          <p className='shad-error text-14-regular'>{submitError}</p>
         )}
         <SubmitButton
           isLoading={isLoading}
