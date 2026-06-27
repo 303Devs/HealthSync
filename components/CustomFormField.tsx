@@ -6,10 +6,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Control, ControllerRenderProps, FieldValues } from 'react-hook-form';
+import {
+  Control,
+  ControllerRenderProps,
+  FieldValues,
+  Path,
+} from 'react-hook-form';
 
-// Control<any> is intentional here — this is a generic reusable field component
-// that must accept any form schema. react-hook-form's own docs recommend this pattern.
 import { FormFieldType } from './forms/PatientForm';
 import Image from 'next/image';
 import 'react-phone-number-input/style.css';
@@ -22,11 +25,10 @@ import { Select, SelectContent, SelectTrigger, SelectValue } from './ui/select';
 import { Textarea } from './ui/textarea';
 import { Checkbox } from './ui/checkbox';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-interface CustomProps {
-  control: Control<any>;
+interface CustomProps<TFieldValues extends FieldValues = FieldValues> {
+  control: Control<TFieldValues>;
   fieldType: FormFieldType;
-  name: string;
+  name: Path<TFieldValues>;
   label?: string;
   placeholder?: string;
   iconSrc?: string;
@@ -38,15 +40,17 @@ interface CustomProps {
   maxDate?: Date;
   minDate?: Date;
   children?: React.ReactNode;
-  renderSkeleton?: (field: ControllerRenderProps<FieldValues, string>) => React.ReactNode;
+  renderSkeleton?: (
+    field: ControllerRenderProps<TFieldValues, Path<TFieldValues>>
+  ) => React.ReactNode;
 }
 
-const RenderField = ({
+const RenderField = <TFieldValues extends FieldValues>({
   field,
   props,
 }: {
-  field: ControllerRenderProps<FieldValues, string>;
-  props: CustomProps;
+  field: ControllerRenderProps<TFieldValues, Path<TFieldValues>>;
+  props: CustomProps<TFieldValues>;
 }) => {
   const {
     fieldType,
@@ -181,7 +185,9 @@ const RenderField = ({
   }
 };
 
-const CustomFormField = (props: CustomProps) => {
+const CustomFormField = <TFieldValues extends FieldValues>(
+  props: CustomProps<TFieldValues>
+) => {
   const { control, fieldType, name, label } = props;
   return (
     <FormField

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import Image from 'next/image';
 import { convertFileToUrl } from '@/lib/utils';
@@ -20,16 +20,16 @@ const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
 const FileUploader = ({ files, onChange }: FileUploaderProps) => {
   const [error, setError] = useState<string | null>(null);
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const fileUrl = useMemo(
+    () => (files && files.length > 0 ? convertFileToUrl(files[0]) : null),
+    [files]
+  );
 
   useEffect(() => {
-    if (files && files.length > 0) {
-      const url = convertFileToUrl(files[0]);
-      setFileUrl(url);
-      return () => URL.revokeObjectURL(url);
-    }
-    setFileUrl(null);
-  }, [files]);
+    return () => {
+      if (fileUrl) URL.revokeObjectURL(fileUrl);
+    };
+  }, [fileUrl]);
 
   const onDrop = useCallback(
     (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
@@ -88,9 +88,7 @@ const FileUploader = ({ files, onChange }: FileUploaderProps) => {
           </>
         }
       </div>
-      {error && (
-        <p className='shad-error text-14-regular mt-2'>{error}</p>
-      )}
+      {error && <p className='shad-error text-14-regular mt-2'>{error}</p>}
     </div>
   );
 };

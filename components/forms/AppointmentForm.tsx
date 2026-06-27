@@ -37,6 +37,12 @@ const AppointmentForm = ({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [appointmentWindow] = useState(() => {
+    const minDate = new Date();
+    const maxDate = new Date(minDate.getTime() + 90 * 24 * 60 * 60 * 1000);
+
+    return { minDate, maxDate };
+  });
 
   const AppointmentFormValidation = getAppointmentSchema(type);
 
@@ -46,7 +52,9 @@ const AppointmentForm = ({
     defaultValues: {
       primaryPhysician: appointment?.primaryPhysician || '',
       schedule:
-        appointment ? new Date(appointment.schedule) : new Date(Date.now()),
+        appointment ?
+          new Date(appointment.schedule)
+        : appointmentWindow.minDate,
       reason: appointment?.reason || '',
       note: appointment?.note || '',
       cancellationReason: appointment?.cancellationReason || '',
@@ -111,7 +119,11 @@ const AppointmentForm = ({
       }
     } catch (error) {
       console.error(error);
-      setSubmitError(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+      setSubmitError(
+        error instanceof Error ?
+          error.message
+        : 'Something went wrong. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -179,8 +191,8 @@ const AppointmentForm = ({
               showTimeSelect
               dateFormat='MM/dd/yyyy - h:mm aa'
               todayButton={true}
-              minDate={new Date(Date.now())}
-              maxDate={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)}
+              minDate={appointmentWindow.minDate}
+              maxDate={appointmentWindow.maxDate}
             />
 
             <div className='flex flex-col gap-6 xl:flex-row'>

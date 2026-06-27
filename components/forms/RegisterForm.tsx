@@ -26,6 +26,7 @@ import { registerPatient } from '@/lib/actions/patient.actions';
 const RegisterForm = ({ user }: { user: User }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [today] = useState(() => new Date());
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof PatientFormValidation>>({
@@ -58,7 +59,19 @@ const RegisterForm = ({ user }: { user: User }) => {
     }
 
     try {
-      const { identificationDocument: _files, treatmentConsent: _tc, disclosureConsent: _dc, ...restValues } = values;
+      const restValues = Object.fromEntries(
+        Object.entries(values).filter(
+          ([key]) =>
+            ![
+              'identificationDocument',
+              'treatmentConsent',
+              'disclosureConsent',
+            ].includes(key)
+        )
+      ) as Omit<
+        typeof values,
+        'identificationDocument' | 'treatmentConsent' | 'disclosureConsent'
+      >;
       const patientData = {
         ...restValues,
         userId: user.$id,
@@ -126,7 +139,7 @@ const RegisterForm = ({ user }: { user: User }) => {
             control={form.control}
             name='birthDate'
             label='Date of Birth'
-            maxDate={new Date(Date.now())}
+            maxDate={today}
             todayButton={true}
           />
           <CustomFormField
@@ -139,7 +152,9 @@ const RegisterForm = ({ user }: { user: User }) => {
                 <RadioGroup
                   className='flex h-11 gap-6 xl:justify-between'
                   onValueChange={field.onChange}
-                  defaultValue={field.value}>
+                  defaultValue={
+                    typeof field.value === 'string' ? field.value : undefined
+                  }>
                   {GenderOptions.map((option) => (
                     <div
                       key={option}
@@ -313,7 +328,7 @@ const RegisterForm = ({ user }: { user: User }) => {
           renderSkeleton={(field) => (
             <FormControl>
               <FileUploader
-                files={field.value}
+                files={Array.isArray(field.value) ? field.value : undefined}
                 onChange={field.onChange}
               />
             </FormControl>
